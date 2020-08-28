@@ -14,6 +14,11 @@ min_arrow_size = 1000
 max_arrow_size = 8000
 area_sum_offset = 0.6
 
+detection_view = "detection view"
+cv2.namedWindow(detection_view)
+
+wireframe_view = "wireframe view"
+cv2.namedWindow(wireframe_view)
 
 def press_key(key, length):
     keyboard.press(key)
@@ -28,14 +33,12 @@ def capture_video():
     else:
         ret = False
 
-    name = "feed"
-    cv2.namedWindow(name)
 
     frame_count = 0
     while ret:
         frame_count = frame_count + 1
         ret, frame = capapture.read()
-        deg, image = detect_arrow(frame)
+        deg = detect_arrow(frame)
 
         deg = deg if abs(deg) > degree_threshold else 0
         next_turn = frame_threshold - abs(deg)
@@ -44,7 +47,6 @@ def capture_video():
             key = Key.left if deg > 0 else Key.right
             press_key(key, abs(deg) / keypress_delta)
 
-        cv2.imshow(name, image)
         if cv2.waitKey(1) == 27:
             break
 
@@ -81,8 +83,12 @@ def detect_arrow(image):
                         deg = deg if deg < 90 else deg - 180
                         cv2.drawContours(
                             image, [approx], 0, (0, 255, 0), thickness=6)
-                        return deg, image
-    return [0, image]
+                        cv2.imshow(detection_view, image)
+                        cv2.imshow(wireframe_view, wireframe_image)
+                        return deg
+    cv2.imshow(detection_view, image)
+    cv2.imshow(wireframe_view, wireframe_image)
+    return 0
 
 
 capture_video()
